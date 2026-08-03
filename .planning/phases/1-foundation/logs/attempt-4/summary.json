@@ -1,0 +1,21 @@
+{
+  "duration_secs": 1463.0,
+  "token_usage": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": 0.0
+  },
+  "model": "claude-sonnet-4-6",
+  "files_changed": [
+    ".planning/ROADMAP.md",
+    ".planning/fragments/phase-1-roadmap.yaml"
+  ],
+  "verification_status": "passed",
+  "error_message": null,
+  "attempt_number": 4,
+  "created_at": "2026-08-03T15:44:20.590270+00:00",
+  "completed_at": "2026-08-03T16:08:43.621472691+00:00"
+}

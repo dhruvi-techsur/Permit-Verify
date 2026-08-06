@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,6 +9,7 @@ import { Input } from '../components/ui/Input';
 import { FormField } from '../components/ui/FormField';
 import { Alert } from '../components/ui/Alert';
 import { PasswordStrengthMeter } from './components/PasswordStrengthMeter';
+import { useAuthStore } from '../store/auth.store';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters').max(100),
@@ -24,6 +25,8 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export default function RegisterPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [passwordValue, setPasswordValue] = useState('');
+  const { register: registerUser } = useAuthStore();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -39,10 +42,16 @@ export default function RegisterPage() {
   const password = watch('password', '');
   React.useEffect(() => setPasswordValue(password), [password]);
 
-  const onSubmit = async (_data: RegisterFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     setServerError(null);
-    // TODO 01-05: wire to useAuthStore().register(data)
-    // On 409: setServerError('An account with this email already exists')
+    try {
+      await registerUser(data);
+      navigate('/dashboard', { replace: true });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      const msg = axiosErr?.response?.data?.message || '';
+      setServerError(msg.includes('exists') ? 'An account with this email already exists' : 'Registration failed');
+    }
   };
 
   return (

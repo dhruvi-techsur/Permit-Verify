@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,6 +9,7 @@ import { Input } from '../components/ui/Input';
 import { FormField } from '../components/ui/FormField';
 import { Alert } from '../components/ui/Alert';
 import { PasswordStrengthMeter } from './components/PasswordStrengthMeter';
+import { useAuthStore } from '../store/auth.store';
 
 const resetSchema = z
   .object({
@@ -31,6 +32,8 @@ export default function ResetPasswordPage() {
   const [succeeded, setSucceeded] = useState(false);
   const [expiredLink, setExpiredLink] = useState(false);
   const [passwordValue, setPasswordValue] = useState('');
+  const { resetPassword } = useAuthStore();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -45,12 +48,15 @@ export default function ResetPasswordPage() {
   const newPassword = watch('newPassword', '');
   React.useEffect(() => setPasswordValue(newPassword), [newPassword]);
 
-  const onSubmit = async (_data: ResetFormData) => {
+  const onSubmit = async (data: ResetFormData) => {
     if (!token) { setExpiredLink(true); return; }
-    // TODO 01-05: wire to API POST /auth/reset-password
-    // On 400 (expired/used): setExpiredLink(true)
-    // On success: setSucceeded(true), then redirect to /login
-    setSucceeded(true);
+    try {
+      await resetPassword({ token, newPassword: data.newPassword, confirmPassword: data.confirmPassword });
+      setSucceeded(true);
+      setTimeout(() => navigate('/login'), 2000);
+    } catch {
+      setExpiredLink(true);
+    }
   };
 
   if (!token || expiredLink) {

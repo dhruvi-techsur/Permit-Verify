@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { FormField } from '../components/ui/FormField';
 import { Alert } from '../components/ui/Alert';
+import { useAuthStore } from '../store/auth.store';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -18,6 +19,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const [serverError, setServerError] = useState<string | null>(null);
+  const { login } = useAuthStore();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -28,10 +31,15 @@ export default function LoginPage() {
     mode: 'onBlur', // Inline validation on blur (UX-Mockup Pattern-03)
   });
 
-  const onSubmit = async (_data: LoginFormData) => {
+  const onSubmit = async (data: LoginFormData) => {
     setServerError(null);
-    // TODO 01-05: wire to useAuthStore().login(data)
-    // On 401: setServerError('Email or password is incorrect')
+    try {
+      await login(data);
+      navigate('/dashboard', { replace: true });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setServerError(axiosErr?.response?.data?.message || 'Email or password is incorrect');
+    }
   };
 
   return (

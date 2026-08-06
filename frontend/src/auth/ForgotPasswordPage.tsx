@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { FormField } from '../components/ui/FormField';
 import { Alert } from '../components/ui/Alert';
+import { useAuthStore } from '../store/auth.store';
 
 const forgotSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -17,6 +18,7 @@ type ForgotFormData = z.infer<typeof forgotSchema>;
 
 export default function ForgotPasswordPage() {
   const [submitted, setSubmitted] = useState(false);
+  const { forgotPassword } = useAuthStore();
 
   const {
     register,
@@ -27,10 +29,12 @@ export default function ForgotPasswordPage() {
     mode: 'onBlur',
   });
 
-  const onSubmit = async (_data: ForgotFormData) => {
-    // TODO 01-05: wire to API POST /auth/forgot-password
-    // Always show success (enumeration-safe per TechArch + Screen-02)
-    setSubmitted(true);
+  const onSubmit = async (data: ForgotFormData) => {
+    try {
+      await forgotPassword(data.email);
+    } finally {
+      setSubmitted(true); // Always show success (enumeration-safe)
+    }
   };
 
   return (

@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface-page text-text-primary font-sans;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  /* Focus visible — never suppress, show immediately */
+  :focus-visible {
+    outline: 2px solid #4F46E5;
+    outline-offset: 2px;
+  }
+
+  /* Respect prefers-reduced-motion for skeleton animations */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-shimmer,
+    .animate-pulse {
+      animation: none;
+    }
+  }
+}
+
+@layer components {
+  /* Skeleton shimmer utility */
+  .skeleton {
+    @apply bg-surface-border rounded animate-pulse;
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      theme('colors.surface.border') 25%,
+      theme('colors.surface.muted') 50%,
+      theme('colors.surface.border') 75%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded;
+  }
+}
